@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 
 class ServerConnectScreen extends ConsumerStatefulWidget {
@@ -70,7 +71,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
 
       if (!mounted) return;
 
-      Navigator.of(context).pushReplacementNamed('/login');
+      context.go('/login');
     } catch (e) {
       if (!mounted) return;
       setState(() {

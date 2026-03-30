@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:altemby/features/auth/domain/user_session.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 
@@ -45,7 +46,7 @@ class UserSelectScreen extends ConsumerWidget {
         ],
         OutlinedButton.icon(
           onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/server-connect');
+            context.go('/server-connect');
           },
           icon: const Icon(Icons.add),
           label: const Text('Add Account'),

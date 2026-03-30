@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -20,7 +21,7 @@ class HomeScreen extends ConsumerWidget {
             icon: const Icon(Icons.switch_account),
             tooltip: 'Switch User',
             onPressed: () {
-              Navigator.of(context).pushNamed('/user-select');
+              context.push('/user-select');
             },
           ),
           IconButton(
