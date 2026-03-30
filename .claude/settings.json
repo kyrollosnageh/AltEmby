@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/kyrol/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/subagent-driven-development/**)",
+      "Bash(flutter create:*)",
+      "Bash(where flutter:*)",
+      "Bash(powershell -Command \"Get-Command flutter -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\'' -Recurse -Filter ''flutter.bat'' -ErrorAction SilentlyContinue | Select-Object -First 5 FullName\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\kyrol'' -Recurse -Filter ''flutter.bat'' -ErrorAction SilentlyContinue -Depth 6 | Select-Object -First 5 FullName\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\\\'' -Filter ''flutter'' -Recurse -Depth 3 -Directory -ErrorAction SilentlyContinue | Select-Object -First 10 FullName\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path @\\(''C:\\\\src'', ''C:\\\\tools'', ''C:\\\\flutter'', ''C:\\\\dev''\\) -ErrorAction SilentlyContinue | Select-Object FullName\")",
+      "Bash(winget install:*)",
+      "Bash(winget search:*)",
+      "Bash(powershell -Command \":*)",
+      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\kyrol\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-kyrol-OneDrive-Documents-AltEmby\\\\fec406fa-b564-4a11-8bc2-95151b1f138f\\\\tasks\\\\bdv1c99hv.output''\")",
+      "Bash(powershell -Command \"Test-Path ''C:\\\\Users\\\\kyrol\\\\AppData\\\\Local\\\\Temp\\\\flutter.zip''\")",
+      "Bash(powershell -Command \"\\(Get-Item ''C:\\\\Users\\\\kyrol\\\\AppData\\\\Local\\\\Temp\\\\flutter.zip''\\).Length / 1MB\")",
+      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\kyrol\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-kyrol-OneDrive-Documents-AltEmby\\\\fec406fa-b564-4a11-8bc2-95151b1f138f\\\\tasks\\\\blxxjwnui.output''\")",
+      "Bash(powershell -Command \"Test-Path ''C:\\\\Users\\\\kyrol\\\\flutter_sdk\\\\flutter\\\\bin\\\\flutter.bat''\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\kyrol\\\\flutter_sdk'' -ErrorAction SilentlyContinue | Select-Object Name\")",
+      "Bash(powershell -Command \"Test-Path ''C:\\\\Users\\\\kyrol\\\\flutter_sdk''\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\kyrol\\\\flutter_sdk'' -Force | Select-Object Name, PSIsContainer\")",
+      "Bash(powershell -Command \"Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{N=''Free\\(GB\\)'';E={$_.Free/1GB -as [int]}}, @{N=''Used\\(GB\\)'';E={$_.Used/1GB -as [int]}}\")",
+      "Bash(powershell -Command \"Get-WmiObject Win32_LogicalDisk | Select-Object DeviceID, @{N=''Free\\(GB\\)'';E={$_.FreeSpace/1GB}}, @{N=''Size\\(GB\\)'';E={$_.Size/1GB}}\")",
+      "Bash(powershell -Command \"\\(Get-PSDrive C\\).Free / 1GB\")",
+      "Bash(tar --version)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\kyrol\\OneDrive\\Documents\\AltEmby\\docs\\superpowers"
+    ]
+  }
+}
