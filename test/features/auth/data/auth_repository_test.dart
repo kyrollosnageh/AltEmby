@@ -4,8 +4,6 @@ import 'package:altemby/core/api/emby_api_client.dart';
 import 'package:altemby/core/api/emby_auth_interceptor.dart';
 import 'package:altemby/core/error/app_exceptions.dart';
 import 'package:altemby/features/auth/data/auth_repository.dart';
-import 'package:altemby/features/auth/domain/server_info.dart';
-import 'package:altemby/features/auth/domain/user_session.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
