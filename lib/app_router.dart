@@ -6,6 +6,7 @@ import 'package:altemby/features/auth/presentation/providers/auth_providers.dart
 import 'package:altemby/features/auth/presentation/server_connect_screen.dart';
 import 'package:altemby/features/auth/presentation/login_screen.dart';
 import 'package:altemby/features/auth/presentation/user_select_screen.dart';
+import 'package:altemby/features/auth/presentation/emby_connect_screen.dart';
 import 'package:altemby/features/details/presentation/movie_detail_screen.dart';
 import 'package:altemby/features/player/presentation/audio_player_screen.dart';
 import 'package:altemby/features/player/presentation/video_player_screen.dart';
@@ -32,7 +33,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState is Authenticated;
       final isAuthRoute = state.matchedLocation == '/server-connect' ||
           state.matchedLocation == '/login' ||
-          state.matchedLocation == '/user-select';
+          state.matchedLocation == '/user-select' ||
+          state.matchedLocation == '/emby-connect';
 
       if (!isAuthenticated && !isAuthRoute) return '/server-connect';
       if (isAuthenticated && isAuthRoute) return '/';
@@ -42,6 +44,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Auth routes (no shell)
       GoRoute(path: '/server-connect', builder: (context, state) => const ServerConnectScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/emby-connect', builder: (context, state) => const EmbyConnectScreen()),
       GoRoute(path: '/user-select', parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const UserSelectScreen()),
 

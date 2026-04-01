@@ -167,6 +167,28 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                           : const Text('Connect'),
                     ),
                   ),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('OR',
+                            style: TextStyle(
+                                color: Colors.grey[600], fontSize: 12)),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/emby-connect'),
+                    icon: const Icon(Icons.cloud),
+                    label: const Text('Sign in with Emby Connect'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  ),
                 ],
               ),
             ),
