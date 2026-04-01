@@ -2,6 +2,7 @@
 
 import 'package:altemby/core/api/api_endpoints.dart';
 import 'package:altemby/core/api/emby_api_client.dart';
+import 'package:altemby/core/error/app_exceptions.dart';
 import 'package:altemby/features/auth/domain/server_info.dart';
 import 'package:altemby/features/auth/domain/user_session.dart';
 
@@ -22,21 +23,27 @@ class AuthRepository {
     required String password,
     required String serverUrl,
   }) async {
-    final data = await _apiClient.post(
-      ApiEndpoints.authenticateByName,
-      data: {
-        'Username': username,
-        'Pw': password,
-      },
-    );
+    _apiClient.updateBaseUrl(serverUrl);
+    try {
+      final data = await _apiClient.post(
+        ApiEndpoints.authenticateByName,
+        data: {
+          'Username': username,
+          'Pw': password,
+        },
+      );
 
-    final session = UserSession.fromAuthResponse(
-      data as Map<String, dynamic>,
-      serverUrl,
-    );
+      final session = UserSession.fromAuthResponse(
+        data as Map<String, dynamic>,
+        serverUrl,
+      );
 
-    _apiClient.authInterceptor.token = session.accessToken;
-    return session;
+      _apiClient.authInterceptor.token = session.accessToken;
+      return session;
+    } on SessionExpiredException {
+      // During login, a 401 means invalid credentials, not an expired session
+      throw const AuthenticationException('Invalid username or password.');
+    }
   }
 
   /// Log out and clear auth state.

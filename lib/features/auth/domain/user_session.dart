@@ -16,10 +16,14 @@ class UserSession {
   factory UserSession.fromAuthResponse(Map<String, dynamic> json, String serverUrl) {
     final user = json['User'] as Map<String, dynamic>?;
     if (user == null || json['AccessToken'] == null) {
-      throw FormatException('Invalid auth response: missing User or AccessToken');
+      throw const FormatException('Invalid auth response: missing User or AccessToken');
+    }
+    final userId = user['Id'] as String?;
+    if (userId == null || userId.isEmpty) {
+      throw const FormatException('Invalid auth response: missing User Id');
     }
     return UserSession(
-      userId: user['Id'] as String? ?? '',
+      userId: userId,
       userName: user['Name'] as String? ?? '',
       accessToken: json['AccessToken'] as String,
       serverId: json['ServerId'] as String? ?? '',
