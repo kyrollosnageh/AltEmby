@@ -65,22 +65,13 @@ jobs:
           storeFile=upload-keystore.jks
           PROPS
 
-      # Build APK + AAB in one Gradle invocation
-      - name: Build APK and AAB
-        run: |
-          cd android
-          ./gradlew assembleRelease bundleRelease --parallel --daemon
-          cd ..
+      - name: Build release APK
+        run: flutter build apk --release
 
       - uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-aab
-          path: build/app/outputs/bundle/release/app-release.aab
 
   # iOS runs in parallel with Android (no dependency)
   build-ios:
@@ -161,10 +152,6 @@ jobs:
           path: artifacts/
       - uses: actions/download-artifact@v4
         with:
-          name: release-aab
-          path: artifacts/
-      - uses: actions/download-artifact@v4
-        with:
           name: ios-ipa
           path: artifacts/
 
@@ -173,7 +160,6 @@ jobs:
           TAG=${GITHUB_REF#refs/tags/}
           cd artifacts
           [ -f app-release.apk ] && mv app-release.apk "AltEmby-${TAG}.apk"
-          [ -f app-release.aab ] && mv app-release.aab "AltEmby-${TAG}.aab"
           [ -f AltEmby.ipa ]    && mv AltEmby.ipa      "AltEmby-${TAG}.ipa"
           ls -la
 
