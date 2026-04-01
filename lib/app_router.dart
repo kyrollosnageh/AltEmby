@@ -15,6 +15,7 @@ import 'package:altemby/features/home/presentation/home_screen.dart';
 import 'package:altemby/features/library/presentation/library_screen.dart';
 import 'package:altemby/features/downloads/presentation/downloads_screen.dart';
 import 'package:altemby/features/search/presentation/search_screen.dart';
+import 'package:altemby/features/settings/presentation/settings_screen.dart';
 import 'package:altemby/shared/models/media_item.dart';
 // ignore: unused_import — TV screen available for Android TV routing
 import 'package:altemby/tv/screens/tv_home_screen.dart';
@@ -67,8 +68,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/downloads', builder: (context, state) => const DownloadsScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/settings', builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Settings - Coming in Phase 7')))),
+            GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
           ]),
         ],
       ),
