@@ -1,7 +1,7 @@
 name: altemby
 description: A lightweight Emby media streaming client.
 publish_to: 'none'
-version: 1.2.3+100
+version: 1.2.4+103
 
 environment:
   sdk: ^3.7.0
