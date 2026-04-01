@@ -15,7 +15,6 @@ permissions:
 
 env:
   FLUTTER_VERSION: stable
-  # Resolve tag from either trigger type
   RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
 jobs:
@@ -38,7 +37,7 @@ jobs:
             echo "Created release $TAG"
           fi
 
-  # Android: test, build, and upload to release
+  # Android: build and upload (skip analyze/test — CI already ran)
   build-android:
     needs: ensure-release
     runs-on: ubuntu-latest
@@ -59,33 +58,18 @@ jobs:
           channel: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: android
-
       - uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
             .dart_tool
-          key: pub-${{ hashFiles('pubspec.lock') }}
-          restore-keys: pub-
-
-      - uses: actions/cache@v4
-        with:
-          path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('android/app/build.gradle.kts', 'android/build.gradle.kts') }}
-          restore-keys: gradle-
+          key: release-android-${{ hashFiles('pubspec.lock', 'android/app/build.gradle.kts') }}
+          restore-keys: release-android-
 
       - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
 
-      # Signing setup
       - name: Decode keystore
         if: env.HAS_KEYSTORE == 'true'
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
@@ -100,9 +84,7 @@ jobs:
           storeFile=upload-keystore.jks
           PROPS
 
-      - name: Build release APK with Fastlane
-        working-directory: android
-        run: bundle exec fastlane release_apk
+      - run: flutter build apk --release --no-pub
 
       - name: Upload APK to GitHub Release
         env:
@@ -112,7 +94,7 @@ jobs:
           mv build/app/outputs/flutter-apk/app-release.apk "AltEmby-${TAG}.apk"
           gh release upload "$TAG" "AltEmby-${TAG}.apk" --clobber
 
-  # iOS: build and upload to release (runs in parallel with Android)
+  # iOS: build and upload (runs in parallel with Android)
   build-ios:
     needs: ensure-release
     runs-on: macos-latest
@@ -126,25 +108,16 @@ jobs:
           channel: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: ios
-
       - uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
             .dart_tool
-          key: pub-macos-${{ hashFiles('pubspec.lock') }}
-          restore-keys: pub-macos-
+          key: release-ios-${{ hashFiles('pubspec.lock') }}
+          restore-keys: release-ios-
 
       - run: flutter pub get
-
-      - name: Build iOS with Fastlane
-        working-directory: ios
-        run: bundle exec fastlane build_no_sign
+      - run: flutter build ios --release --no-codesign --no-pub
 
       - name: Package IPA
         run: |
