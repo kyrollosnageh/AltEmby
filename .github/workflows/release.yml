@@ -19,8 +19,28 @@ env:
   RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
 jobs:
-  # Run test + Android build in ONE job to avoid re-downloading everything
-  test-and-build-android:
+  # Ensure the GitHub Release exists (no-op if auto-release already created it)
+  ensure-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release if it doesn't exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ env.RELEASE_TAG }}"
+          if gh release view "$TAG" &>/dev/null; then
+            echo "Release $TAG already exists"
+          else
+            gh release create "$TAG" \
+              --title "AltEmby $TAG" \
+              --generate-notes
+            echo "Created release $TAG"
+          fi
+
+  # Android: test, build, and upload to release
+  build-android:
+    needs: ensure-release
     runs-on: ubuntu-latest
     env:
       HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
@@ -84,13 +104,17 @@ jobs:
         working-directory: android
         run: bundle exec fastlane release_apk
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Upload APK to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ env.RELEASE_TAG }}"
+          mv build/app/outputs/flutter-apk/app-release.apk "AltEmby-${TAG}.apk"
+          gh release upload "$TAG" "AltEmby-${TAG}.apk" --clobber
 
-  # iOS runs in parallel with Android (no dependency)
+  # iOS: build and upload to release (runs in parallel with Android)
   build-ios:
+    needs: ensure-release
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -129,41 +153,10 @@ jobs:
           zip -r AltEmby.ipa Payload
           rm -rf Payload
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ios-ipa
-          path: AltEmby.ipa
-
-  # Create release after both builds finish
-  create-release:
-    needs: [test-and-build-android, build-ios]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-apk
-          path: artifacts/
-      - uses: actions/download-artifact@v4
-        with:
-          name: ios-ipa
-          path: artifacts/
-
-      - name: Rename artifacts
-        run: |
-          TAG="${{ env.RELEASE_TAG }}"
-          cd artifacts
-          [ -f app-release.apk ] && mv app-release.apk "AltEmby-${TAG}.apk"
-          [ -f AltEmby.ipa ]    && mv AltEmby.ipa      "AltEmby-${TAG}.ipa"
-          ls -la
-
-      - name: Create GitHub Release
+      - name: Upload IPA to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ env.RELEASE_TAG }}"
-          gh release create "$TAG" \
-            --title "AltEmby $TAG" \
-            --generate-notes \
-            artifacts/*
+          mv AltEmby.ipa "AltEmby-${TAG}.ipa"
+          gh release upload "$TAG" "AltEmby-${TAG}.ipa" --clobber

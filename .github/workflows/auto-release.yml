@@ -140,6 +140,17 @@ jobs:
 
       # GITHUB_TOKEN-created tags don't trigger other workflows,
       # so we dispatch the release workflow directly
+      - name: Create GitHub Release
+        if: steps.bump.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.new_version }}"
+          gh release create "$TAG" \
+            --title "AltEmby $TAG" \
+            --generate-notes
+          echo "Created release $TAG — build artifacts will be uploaded as they complete"
+
       - name: Trigger release workflow
         if: steps.bump.outputs.skip != 'true'
         env:
