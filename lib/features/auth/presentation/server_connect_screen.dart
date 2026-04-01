@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:altemby/core/error/app_exceptions.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 
 class ServerConnectScreen extends ConsumerStatefulWidget {
@@ -53,6 +54,13 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
 
     final url = _normalizeUrl(_urlController.text);
 
+    // Validate URL format
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority || uri.host.isEmpty) {
+      setState(() => _errorMessage = 'Please enter a valid server URL');
+      return;
+    }
+
     setState(() => _isConnecting = true);
 
     try {
@@ -72,10 +80,16 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
       if (!mounted) return;
 
       context.go('/login');
-    } catch (e) {
+    } on AppException catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Could not connect to server: $e';
+        _errorMessage = e.userMessage;
+        _isConnecting = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Could not connect to server. Check the URL and try again.';
         _isConnecting = false;
       });
     }

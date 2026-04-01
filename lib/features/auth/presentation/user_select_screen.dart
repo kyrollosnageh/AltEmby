@@ -80,10 +80,10 @@ class _ProfileCard extends ConsumerWidget {
             await ref
                 .read(authNotifierProvider.notifier)
                 .switchToSession(session);
-          } catch (e) {
+          } catch (_) {
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to restore session: $e')),
+              const SnackBar(content: Text('Failed to restore session. Please sign in again.')),
             );
           }
         },

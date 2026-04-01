@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:altemby/core/api/api_endpoints.dart';
@@ -81,8 +83,32 @@ class DownloadService {
       : _apiClient = apiClient,
         _dio = Dio();
 
+  /// Get or create an encryption key for the downloads Hive box.
+  Future<List<int>> _getEncryptionKey() async {
+    const storage = FlutterSecureStorage();
+    const keyName = 'downloads_hive_key';
+    final existing = await storage.read(key: keyName);
+    if (existing != null) {
+      return existing.codeUnits.take(32).toList();
+    }
+    // Generate a random 32-byte key
+    final random = Random.secure();
+    final key = List<int>.generate(32, (_) => random.nextInt(256));
+    await storage.write(key: keyName, value: String.fromCharCodes(key));
+    return key;
+  }
+
+  Future<Box<dynamic>> _openBox() async {
+    if (Hive.isBoxOpen('downloads_enc')) {
+      return Hive.box('downloads_enc');
+    }
+    final key = await _getEncryptionKey();
+    return Hive.openBox('downloads_enc',
+        encryptionCipher: HiveAesCipher(key));
+  }
+
   Future<void> loadFromStorage() async {
-    final box = await Hive.openBox('downloads');
+    final box = await _openBox();
     for (final key in box.keys) {
       final json = box.get(key);
       if (json != null) {
@@ -94,12 +120,12 @@ class DownloadService {
   }
 
   Future<void> _save(DownloadItem item) async {
-    final box = await Hive.openBox('downloads');
+    final box = await _openBox();
     await box.put(item.itemId, item.toJson());
   }
 
   Future<void> _remove(String itemId) async {
-    final box = await Hive.openBox('downloads');
+    final box = await _openBox();
     await box.delete(itemId);
   }
 
@@ -123,7 +149,10 @@ class DownloadService {
 
   Future<void> _startDownload(DownloadItem item) async {
     final dir = await _getDownloadDir();
-    final filePath = '${dir.path}/${item.itemId}.media';
+    // Use random filename to prevent enumeration of downloaded content
+    final random = Random.secure();
+    final randomHex = List.generate(16, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
+    final filePath = '${dir.path}/$randomHex.media';
 
     final cancelToken = CancelToken();
     _cancelTokens[item.itemId] = cancelToken;

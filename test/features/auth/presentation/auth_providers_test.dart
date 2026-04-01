@@ -2,6 +2,7 @@
 
 import 'package:altemby/features/auth/data/auth_repository.dart';
 import 'package:altemby/features/auth/data/secure_storage_service.dart';
+import 'package:altemby/features/auth/domain/server_info.dart';
 import 'package:altemby/features/auth/domain/user_session.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +41,13 @@ void main() {
       );
       when(() => mockStorage.loadSession()).thenAnswer((_) async => session);
       when(() => mockRepo.restoreSession(session)).thenReturn(null);
+      when(() => mockRepo.validateServer('https://emby.test'))
+          .thenAnswer((_) async => const ServerInfo(
+                url: 'https://emby.test',
+                serverName: 'Test',
+                serverId: 's1',
+                version: '4.8.0',
+              ));
 
       await notifier.tryRestoreSession();
 
@@ -47,6 +55,26 @@ void main() {
         notifier.state,
         AuthState.authenticated(session),
       );
+    });
+
+    test('tryRestoreSession clears session when server unreachable', () async {
+      final session = UserSession(
+        userId: 'u1',
+        userName: 'Test',
+        accessToken: 'tok',
+        serverId: 's1',
+        serverUrl: 'https://emby.test',
+      );
+      when(() => mockStorage.loadSession()).thenAnswer((_) async => session);
+      when(() => mockRepo.restoreSession(session)).thenReturn(null);
+      when(() => mockRepo.validateServer('https://emby.test'))
+          .thenThrow(Exception('unreachable'));
+      when(() => mockStorage.clearSession()).thenAnswer((_) async {});
+
+      await notifier.tryRestoreSession();
+
+      expect(notifier.state, const AuthState.unauthenticated());
+      verify(() => mockStorage.clearSession()).called(1);
     });
 
     test('tryRestoreSession stays unauthenticated when no session', () async {

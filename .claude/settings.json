@@ -23,7 +23,25 @@
       "Bash(powershell -Command \"Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{N=''Free\\(GB\\)'';E={$_.Free/1GB -as [int]}}, @{N=''Used\\(GB\\)'';E={$_.Used/1GB -as [int]}}\")",
       "Bash(powershell -Command \"Get-WmiObject Win32_LogicalDisk | Select-Object DeviceID, @{N=''Free\\(GB\\)'';E={$_.FreeSpace/1GB}}, @{N=''Size\\(GB\\)'';E={$_.Size/1GB}}\")",
       "Bash(powershell -Command \"\\(Get-PSDrive C\\).Free / 1GB\")",
-      "Bash(tar --version)"
+      "Bash(tar --version)",
+      "Bash(export PATH=\"$PATH:C:/Users/kyrol/AppData/Local/flutter_sdk/flutter/bin\")",
+      "Bash(flutter --version)",
+      "Read(//c/Users/kyrol/AppData/Local/flutter_sdk/flutter/bin/**)",
+      "Read(//c/Users/kyrol/AppData/Local/**)",
+      "Bash(export PATH=\"$PATH:/c/Users/kyrol/AppData/Local/flutter_sdk/flutter/bin\")",
+      "Bash(flutter analyze:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter pub:*)",
+      "Bash(python3 \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"entertainment media streaming video player dark immersive content-first\" --design-system -p \"AltEmby\")",
+      "Bash(ls /c/Users/kyrol/AppData/Local/Programs/Python/*/python.exe)",
+      "Bash(ls /c/Python*/python.exe)",
+      "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"entertainment media streaming video player dark immersive content-first\" --design-system -p \"AltEmby\")",
+      "Read(//c/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/**)",
+      "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"entertainment media streaming video player dark immersive content-first\" --design-system -p \"AltEmby\")",
+      "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"dark mode cinema streaming\" --domain color -n 5)",
+      "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"animation accessibility loading\" --domain ux -n 10)"
     ],
     "additionalDirectories": [
       "c:\\Users\\kyrol\\OneDrive\\Documents\\AltEmby\\docs\\superpowers"

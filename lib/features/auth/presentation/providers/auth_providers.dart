@@ -76,7 +76,7 @@ final embyAuthInterceptorProvider = Provider<EmbyAuthInterceptor>(
 
 final embyApiClientProvider = Provider<EmbyApiClient>(
   (ref) => EmbyApiClient(
-    baseUrl: 'http://localhost', // Will be updated when server is set
+    baseUrl: 'https://localhost', // Placeholder; updated when server is configured
     authInterceptor: ref.watch(embyAuthInterceptorProvider),
   ),
 );
@@ -115,7 +115,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final session = await _storageService.loadSession();
     if (session != null) {
       _authRepository.restoreSession(session);
-      state = AuthState.authenticated(session);
+      // Validate the session is still valid by hitting a lightweight endpoint
+      try {
+        await _authRepository.validateServer(session.serverUrl);
+        state = AuthState.authenticated(session);
+      } catch (_) {
+        // Session or server unreachable -- clear and require re-login
+        await _storageService.clearSession();
+        state = const AuthState.unauthenticated();
+      }
     } else {
       state = const AuthState.unauthenticated();
     }

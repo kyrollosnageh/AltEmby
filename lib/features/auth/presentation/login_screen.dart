@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:altemby/core/error/app_exceptions.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   String? _usernameError;
   String? _loginError;
+  int _failedAttempts = 0;
+  DateTime? _lockoutUntil;
 
   @override
   void dispose() {
@@ -31,6 +34,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _usernameError = null;
       _loginError = null;
     });
+
+    // Rate limiting: block after 5 consecutive failures
+    if (_lockoutUntil != null && DateTime.now().isBefore(_lockoutUntil!)) {
+      final remaining = _lockoutUntil!.difference(DateTime.now()).inSeconds;
+      setState(() => _loginError = 'Too many attempts. Try again in ${remaining}s.');
+      return;
+    }
 
     if (_usernameController.text.trim().isEmpty) {
       setState(() => _usernameError = 'Please enter your username');
@@ -51,10 +61,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: _passwordController.text,
             serverUrl: serverInfo.url,
           );
-    } catch (e) {
+      _failedAttempts = 0; // Reset on success
+    } on AppException catch (e) {
       if (!mounted) return;
+      _failedAttempts++;
+      if (_failedAttempts >= 5) {
+        _lockoutUntil = DateTime.now().add(Duration(seconds: 30 * (_failedAttempts ~/ 5)));
+      }
       setState(() {
-        _loginError = 'Login failed: $e';
+        _loginError = e.userMessage;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      _failedAttempts++;
+      if (_failedAttempts >= 5) {
+        _lockoutUntil = DateTime.now().add(Duration(seconds: 30 * (_failedAttempts ~/ 5)));
+      }
+      setState(() {
+        _loginError = 'Login failed. Please try again.';
         _isLoading = false;
       });
     }
