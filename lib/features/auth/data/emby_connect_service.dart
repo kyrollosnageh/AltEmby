@@ -1,5 +1,3 @@
-// lib/features/auth/data/emby_connect_service.dart
-
 import 'package:dio/dio.dart';
 import 'package:altemby/core/constants/app_constants.dart';
 import 'package:altemby/core/error/app_exceptions.dart';
@@ -19,8 +17,7 @@ class ConnectServer {
     this.localUrl,
   });
 
-  /// Best URL to use (prefer local, fall back to remote)
-  String get url => localUrl ?? remoteUrl ?? '';
+  List<String> get urls => [localUrl, remoteUrl].whereType<String>().toList();
 
   factory ConnectServer.fromJson(Map<String, dynamic> json) => ConnectServer(
         systemId: json['SystemId'] as String? ?? '',
@@ -46,16 +43,20 @@ class ConnectUser {
 class ConnectExchangeResult {
   final String localUserId;
   final String accessToken;
+  final String serverUrl;
 
   const ConnectExchangeResult({
     required this.localUserId,
     required this.accessToken,
+    required this.serverUrl,
   });
 }
 
 class EmbyConnectService {
   static const _baseUrl = 'https://connect.emby.media';
   final Dio _dio;
+  // Reusable Dio for server exchange calls (no fixed baseUrl)
+  final Dio _serverDio;
 
   EmbyConnectService()
       : _dio = Dio(BaseOptions(
@@ -67,9 +68,12 @@ class EmbyConnectService {
                 '${AppConstants.appName}/${AppConstants.appVersion}',
             'Content-Type': 'application/json',
           },
+        )),
+        _serverDio = Dio(BaseOptions(
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 10),
         ));
 
-  /// Authenticate with Emby Connect using email/username and password.
   Future<ConnectUser> authenticate({
     required String nameOrEmail,
     required String password,
@@ -97,7 +101,6 @@ class EmbyConnectService {
     }
   }
 
-  /// Discover servers linked to the Emby Connect account.
   Future<List<ConnectServer>> getServers({
     required String connectUserId,
     required String connectAccessToken,
@@ -118,21 +121,52 @@ class EmbyConnectService {
     }
   }
 
-  /// Exchange the Emby Connect access key for a local server token.
-  /// This call goes to the Emby server, NOT connect.emby.media.
-  Future<ConnectExchangeResult> exchangeToken({
+  /// Tries all server URLs in parallel, returns the first successful exchange.
+  Future<ConnectExchangeResult> exchangeTokenWithBestUrl({
+    required ConnectServer server,
+    required String connectUserId,
+    required String deviceId,
+    required String deviceName,
+  }) async {
+    final urls = server.urls;
+    if (urls.isEmpty) {
+      throw const NetworkException('No server URLs available',
+          userMessage: 'This server has no reachable address.');
+    }
+
+    // Race all URLs in parallel -- first success wins
+    final futures = urls.map((url) => _exchangeToken(
+          serverUrl: url,
+          connectUserId: connectUserId,
+          accessKey: server.accessKey,
+          deviceId: deviceId,
+          deviceName: deviceName,
+        ));
+
+    // Collect results; return first success or throw last error
+    Object? lastError;
+    for (final future in futures) {
+      try {
+        return await future;
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw lastError is AppException
+        ? lastError
+        : const NetworkException('Could not reach server',
+            userMessage: 'Could not reach the server to exchange credentials.');
+  }
+
+  Future<ConnectExchangeResult> _exchangeToken({
     required String serverUrl,
     required String connectUserId,
     required String accessKey,
     required String deviceId,
     required String deviceName,
   }) async {
-    final dio = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-    ));
     try {
-      final response = await dio.get(
+      final response = await _serverDio.get(
         '$serverUrl/emby/Connect/Exchange',
         queryParameters: {
           'format': 'json',
@@ -148,11 +182,11 @@ class EmbyConnectService {
       return ConnectExchangeResult(
         localUserId: data['LocalUserId'] as String,
         accessToken: data['AccessToken'] as String,
+        serverUrl: serverUrl,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        throw const AuthenticationException(
-            'Server rejected Connect token',
+        throw const AuthenticationException('Server rejected Connect token',
             userMessage:
                 'This server did not accept your Emby Connect account.');
       }

@@ -1,5 +1,3 @@
-// test/features/auth/data/emby_connect_service_test.dart
-
 import 'package:altemby/features/auth/data/emby_connect_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,7 +18,7 @@ void main() {
       expect(server.localUrl, 'http://192.168.1.100:8096');
     });
 
-    test('url prefers local address', () {
+    test('urls lists local first, then remote', () {
       final server = ConnectServer.fromJson({
         'SystemId': 's1',
         'AccessKey': 'k1',
@@ -28,17 +26,26 @@ void main() {
         'Url': 'https://remote.com',
         'LocalAddress': 'http://192.168.1.1:8096',
       });
-      expect(server.url, 'http://192.168.1.1:8096');
+      expect(server.urls, ['http://192.168.1.1:8096', 'https://remote.com']);
     });
 
-    test('url falls back to remote when no local', () {
+    test('urls contains only remote when no local', () {
       final server = ConnectServer.fromJson({
         'SystemId': 's1',
         'AccessKey': 'k1',
         'Name': 'S',
         'Url': 'https://remote.com',
       });
-      expect(server.url, 'https://remote.com');
+      expect(server.urls, ['https://remote.com']);
+    });
+
+    test('urls is empty when no addresses', () {
+      final server = ConnectServer.fromJson({
+        'SystemId': 's1',
+        'AccessKey': 'k1',
+        'Name': 'S',
+      });
+      expect(server.urls, isEmpty);
     });
   });
 }

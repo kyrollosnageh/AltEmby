@@ -23,6 +23,8 @@ import 'package:altemby/tv/screens/tv_home_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+const _authRoutes = {'/server-connect', '/login', '/user-select', '/emby-connect'};
+
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
 
@@ -31,10 +33,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     redirect: (context, state) {
       final isAuthenticated = authState is Authenticated;
-      final isAuthRoute = state.matchedLocation == '/server-connect' ||
-          state.matchedLocation == '/login' ||
-          state.matchedLocation == '/user-select' ||
-          state.matchedLocation == '/emby-connect';
+      final isAuthRoute = _authRoutes.contains(state.matchedLocation);
 
       if (!isAuthenticated && !isAuthRoute) return '/server-connect';
       if (isAuthenticated && isAuthRoute) return '/';

@@ -152,6 +152,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState.authenticated(session);
   }
 
+  /// Authenticate via Emby Connect token exchange result.
+  /// Handles all storage, API client setup, and state in one place.
+  Future<void> loginWithConnect({
+    required UserSession session,
+    required String serverUrl,
+  }) async {
+    state = const AuthState.loading();
+    _authRepository.restoreSession(session);
+    await _storageService.saveSession(session);
+    await _storageService.addSavedSession(session);
+    await _storageService.saveServerUrl(serverUrl);
+    state = AuthState.authenticated(session);
+  }
+
   Future<void> logout() async {
     try {
       await _authRepository.logout();
