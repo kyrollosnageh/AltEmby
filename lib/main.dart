@@ -3,12 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:altemby/app_router.dart';
 import 'package:altemby/core/theme/app_theme.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
