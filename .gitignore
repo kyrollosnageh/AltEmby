@@ -65,6 +65,18 @@ ios/Flutter/Flutter.podspec
 *.freezed.dart
 *.mocks.dart
 
+# Fastlane
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots
+*/fastlane/test_output
+*/fastlane/README.md
+vendor/bundle
+android/play-store-key.json
+Gemfile.lock
+android/Gemfile.lock
+ios/Gemfile.lock
+
 # Secrets
 .env
 *.env

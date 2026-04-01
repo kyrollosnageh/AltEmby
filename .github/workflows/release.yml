@@ -39,6 +39,12 @@ jobs:
           channel: ${{ env.FLUTTER_VERSION }}
           cache: true
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: android
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -74,8 +80,9 @@ jobs:
           storeFile=upload-keystore.jks
           PROPS
 
-      - name: Build release APK
-        run: flutter build apk --release
+      - name: Build release APK with Fastlane
+        working-directory: android
+        run: bundle exec fastlane release_apk
 
       - uses: actions/upload-artifact@v4
         with:
@@ -85,8 +92,6 @@ jobs:
   # iOS runs in parallel with Android (no dependency)
   build-ios:
     runs-on: macos-latest
-    env:
-      HAS_IOS_CERT: ${{ secrets.IOS_P12_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -96,6 +101,12 @@ jobs:
         with:
           channel: ${{ env.FLUTTER_VERSION }}
           cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: ios
 
       - uses: actions/cache@v4
         with:
@@ -107,36 +118,9 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Install Apple certificate and provisioning profile
-        if: env.HAS_IOS_CERT == 'true'
-        run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD=$(openssl rand -hex 12)
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          CERT_PATH=$RUNNER_TEMP/certificate.p12
-          echo "${{ secrets.IOS_P12_BASE64 }}" | base64 -d > "$CERT_PATH"
-          security import "$CERT_PATH" -P "${{ secrets.IOS_P12_PASSWORD }}" -A -t cert -f pkcs12 \
-            -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: \
-            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
-
-          PROVISION_BASE64="${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}"
-          if [ -n "$PROVISION_BASE64" ]; then
-            PROFILE_PATH=$RUNNER_TEMP/profile.mobileprovision
-            echo "$PROVISION_BASE64" | base64 -d > "$PROFILE_PATH"
-            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-            PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" \
-              /dev/stdin <<< "$(security cms -D -i "$PROFILE_PATH")")
-            cp "$PROFILE_PATH" \
-              ~/Library/MobileDevice/Provisioning\ Profiles/"$PROFILE_UUID".mobileprovision
-          fi
-
-      - name: Build iOS
-        run: flutter build ios --release --no-codesign
+      - name: Build iOS with Fastlane
+        working-directory: ios
+        run: bundle exec fastlane build_no_sign
 
       - name: Package IPA
         run: |
