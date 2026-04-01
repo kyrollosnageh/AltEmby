@@ -127,8 +127,12 @@ jobs:
 
           git add pubspec.yaml
           git commit -m "chore(release): bump version to ${NEW_VERSION} [skip ci]"
-          git tag -a "$TAG" -m "Release ${TAG}"
 
+          # Delete stale tag if it exists from a previous failed run
+          git tag -d "$TAG" 2>/dev/null || true
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+
+          git tag -a "$TAG" -m "Release ${TAG}"
           git push origin HEAD
           git push origin "$TAG"
 
