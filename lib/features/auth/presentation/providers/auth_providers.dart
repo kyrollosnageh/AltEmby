@@ -9,6 +9,8 @@ import 'package:altemby/features/auth/data/auth_repository.dart';
 import 'package:altemby/features/auth/data/secure_storage_service.dart';
 import 'package:altemby/features/auth/domain/server_info.dart';
 import 'package:altemby/features/auth/domain/user_session.dart';
+import 'package:altemby/features/home/data/home_repository.dart';
+import 'package:altemby/features/library/data/library_repository.dart';
 
 // --- Auth State ---
 
@@ -158,3 +160,11 @@ final savedSessionsProvider = FutureProvider<List<UserSession>>((ref) async {
   final storage = ref.watch(secureStorageServiceProvider);
   return storage.loadSavedSessions();
 });
+
+final homeRepositoryProvider = Provider<HomeRepository>(
+  (ref) => HomeRepository(apiClient: ref.watch(embyApiClientProvider)),
+);
+
+final libraryRepositoryProvider = Provider<LibraryRepository>(
+  (ref) => LibraryRepository(apiClient: ref.watch(embyApiClientProvider)),
+);
