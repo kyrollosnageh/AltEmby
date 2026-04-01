@@ -132,3 +132,14 @@ jobs:
           git push origin "$TAG"
 
           echo "Created and pushed tag: $TAG"
+
+      # GITHUB_TOKEN-created tags don't trigger other workflows,
+      # so we dispatch the release workflow directly
+      - name: Trigger release workflow
+        if: steps.bump.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.new_version }}"
+          gh workflow run release.yml -f tag="$TAG"
+          echo "Dispatched release workflow for $TAG"
