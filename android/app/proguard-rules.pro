@@ -27,3 +27,7 @@
 
 # Prevent R8 from removing media_kit native libraries
 -keep class org.jni.** { *; }
+
+# Google Play Core (referenced by Flutter deferred components)
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.play.core.** { *; }
