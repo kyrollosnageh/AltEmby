@@ -141,6 +141,8 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   Future<void> openItem({
     required String itemId,
     String? mediaSourceId,
+    int? audioStreamIndex,
+    int? subtitleStreamIndex,
     int resumePositionTicks = 0,
   }) async {
     state = state.copyWith(currentItemId: itemId);
@@ -150,6 +152,8 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       'Static': 'true',
       if (_token != null) 'api_key': _token,
       if (mediaSourceId != null) 'MediaSourceId': mediaSourceId,
+      if (audioStreamIndex != null) 'AudioStreamIndex': audioStreamIndex.toString(),
+      if (subtitleStreamIndex != null) 'SubtitleStreamIndex': subtitleStreamIndex.toString(),
     };
     final query = params.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
     final url = '$_baseUrl$path?$query';

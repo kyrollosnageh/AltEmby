@@ -5,17 +5,24 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:altemby/features/player/presentation/providers/player_providers.dart';
 import 'package:altemby/features/player/presentation/widgets/player_controls.dart';
+import 'package:altemby/features/player/presentation/widgets/stats_overlay.dart';
 
 class VideoPlayerScreen extends ConsumerStatefulWidget {
   final String itemId;
   final String title;
   final int resumePositionTicks;
+  final String? mediaSourceId;
+  final int? audioStreamIndex;
+  final int? subtitleStreamIndex;
 
   const VideoPlayerScreen({
     super.key,
     required this.itemId,
     required this.title,
     this.resumePositionTicks = 0,
+    this.mediaSourceId,
+    this.audioStreamIndex,
+    this.subtitleStreamIndex,
   });
 
   @override
@@ -23,6 +30,8 @@ class VideoPlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
+  bool _showStats = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +45,9 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(playerNotifierProvider.notifier).openItem(
             itemId: widget.itemId,
+            mediaSourceId: widget.mediaSourceId,
+            audioStreamIndex: widget.audioStreamIndex,
+            subtitleStreamIndex: widget.subtitleStreamIndex,
             resumePositionTicks: widget.resumePositionTicks,
           );
     });
@@ -64,7 +76,12 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
             fit: BoxFit.contain,
             fill: Colors.black,
           ),
-          PlayerControls(title: widget.title),
+          PlayerControls(
+            title: widget.title,
+            onStatsToggle: () => setState(() => _showStats = !_showStats),
+          ),
+          if (_showStats)
+            StatsOverlay(player: notifier.player),
         ],
       ),
     );

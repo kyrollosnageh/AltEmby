@@ -5,6 +5,7 @@ import 'package:altemby/core/utils/image_utils.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 import 'package:altemby/features/details/presentation/providers/details_providers.dart';
 import 'package:altemby/features/home/presentation/widgets/home_section.dart';
+import 'package:altemby/features/player/presentation/widgets/media_source_sheet.dart';
 import 'package:altemby/shared/models/media_item.dart';
 import 'package:altemby/features/downloads/presentation/providers/download_providers.dart';
 import 'package:altemby/shared/widgets/emby_image.dart';
@@ -29,6 +30,37 @@ class MovieDetailScreen extends ConsumerWidget {
     );
   }
 
+  void _play(BuildContext context, MediaItem item, {bool showPicker = false}) async {
+    final resume = item.playbackPositionTicks;
+    String? mediaSourceId;
+    int? audioStreamIndex;
+    int? subtitleStreamIndex;
+
+    if (showPicker && item.mediaSources.isNotEmpty) {
+      final selection = await MediaSourceSheet.show(
+        context,
+        sources: item.mediaSources,
+      );
+      if (selection == null) return; // User dismissed
+      mediaSourceId = selection.source.id;
+      audioStreamIndex = selection.audioStreamIndex;
+      subtitleStreamIndex = selection.subtitleStreamIndex;
+    } else if (item.mediaSources.isNotEmpty) {
+      mediaSourceId = item.mediaSources.first.id;
+    }
+
+    if (!context.mounted) return;
+    final params = <String, String>{
+      'title': Uri.encodeComponent(item.name),
+      'resume': '$resume',
+      if (mediaSourceId != null) 'mediaSourceId': mediaSourceId,
+      if (audioStreamIndex != null) 'audioStreamIndex': '$audioStreamIndex',
+      if (subtitleStreamIndex != null) 'subtitleStreamIndex': '$subtitleStreamIndex',
+    };
+    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    context.push('/player/${item.id}?$query');
+  }
+
   Widget _buildContent(BuildContext context, WidgetRef ref, MediaItem item, String baseUrl) {
     final similarAsync = ref.watch(similarItemsProvider(itemId));
     return CustomScrollView(slivers: [
@@ -47,18 +79,24 @@ class MovieDetailScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           // Play button
           FilledButton.icon(
-            onPressed: () {
-              final resume = item.playbackPositionTicks;
-              context.push(
-                '/player/${item.id}?title=${Uri.encodeComponent(item.name)}&resume=$resume',
-              );
-            },
+            onPressed: () => _play(context, item),
             icon: const Icon(Icons.play_arrow),
             label: Text(item.hasProgress ? 'Resume' : 'Play'),
             style: FilledButton.styleFrom(
               minimumSize: const Size(double.infinity, 48),
             ),
           ),
+          if (item.mediaSources.length > 1) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => _play(context, item, showPicker: true),
+              icon: const Icon(Icons.tune),
+              label: const Text('Play with options'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () {
