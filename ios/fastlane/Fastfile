@@ -1,0 +1,10 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build iOS app (no codesign)"
+  lane :build_no_sign do
+    Dir.chdir("../..") do
+      sh("flutter", "build", "ios", "--release", "--no-codesign")
+    end
+  end
+end
