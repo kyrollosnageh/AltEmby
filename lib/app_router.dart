@@ -7,6 +7,7 @@ import 'package:altemby/features/auth/presentation/server_connect_screen.dart';
 import 'package:altemby/features/auth/presentation/login_screen.dart';
 import 'package:altemby/features/auth/presentation/user_select_screen.dart';
 import 'package:altemby/features/details/presentation/movie_detail_screen.dart';
+import 'package:altemby/features/player/presentation/audio_player_screen.dart';
 import 'package:altemby/features/player/presentation/video_player_screen.dart';
 import 'package:altemby/features/details/presentation/series_detail_screen.dart';
 import 'package:altemby/features/details/presentation/providers/details_providers.dart';
@@ -72,6 +73,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final itemId = state.pathParameters['id']!;
           return _DetailRouter(itemId: itemId);
         }),
+      GoRoute(
+        path: '/audio-player',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AudioPlayerScreen(),
+      ),
       GoRoute(
         path: '/player/:id',
         parentNavigatorKey: _rootNavigatorKey,
