@@ -32,6 +32,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
     redirect: (context, state) {
+      if (authState is AuthLoading) return null; // Don't redirect during loading
       final isAuthenticated = authState is Authenticated;
       final isAuthRoute = _authRoutes.contains(state.matchedLocation);
 

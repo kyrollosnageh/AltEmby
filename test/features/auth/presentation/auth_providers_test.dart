@@ -5,6 +5,7 @@ import 'package:altemby/features/auth/data/secure_storage_service.dart';
 import 'package:altemby/features/auth/domain/server_info.dart';
 import 'package:altemby/features/auth/domain/user_session.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -16,15 +17,28 @@ void main() {
   group('AuthNotifier', () {
     late MockSecureStorageService mockStorage;
     late MockAuthRepository mockRepo;
+    late ProviderContainer container;
     late AuthNotifier notifier;
 
     setUp(() {
       mockStorage = MockSecureStorageService();
       mockRepo = MockAuthRepository();
-      notifier = AuthNotifier(
-        storageService: mockStorage,
-        authRepository: mockRepo,
+
+      // Stub loadSavedSessions so savedSessionsProvider doesn't fail
+      when(() => mockStorage.loadSavedSessions())
+          .thenAnswer((_) async => <UserSession>[]);
+
+      container = ProviderContainer(
+        overrides: [
+          secureStorageServiceProvider.overrideWithValue(mockStorage),
+          authRepositoryProvider.overrideWithValue(mockRepo),
+        ],
       );
+      notifier = container.read(authNotifierProvider.notifier);
+    });
+
+    tearDown(() {
+      container.dispose();
     });
 
     test('initial state is unauthenticated', () {
@@ -110,7 +124,7 @@ void main() {
       expect(notifier.state, AuthState.authenticated(session));
     });
 
-    test('logout clears state', () async {
+    test('logout clears state and invalidates saved sessions', () async {
       when(() => mockRepo.logout()).thenAnswer((_) async {});
       when(() => mockStorage.clearSession()).thenAnswer((_) async {});
 

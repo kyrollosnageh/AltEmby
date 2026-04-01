@@ -14,12 +14,15 @@ class UserSession {
   });
 
   factory UserSession.fromAuthResponse(Map<String, dynamic> json, String serverUrl) {
-    final user = json['User'] as Map<String, dynamic>;
+    final user = json['User'] as Map<String, dynamic>?;
+    if (user == null || json['AccessToken'] == null) {
+      throw FormatException('Invalid auth response: missing User or AccessToken');
+    }
     return UserSession(
-      userId: user['Id'] as String,
-      userName: user['Name'] as String,
+      userId: user['Id'] as String? ?? '',
+      userName: user['Name'] as String? ?? '',
       accessToken: json['AccessToken'] as String,
-      serverId: json['ServerId'] as String,
+      serverId: json['ServerId'] as String? ?? '',
       serverUrl: serverUrl,
     );
   }

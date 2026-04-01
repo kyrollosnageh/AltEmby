@@ -134,28 +134,31 @@ class EmbyConnectService {
           userMessage: 'This server has no reachable address.');
     }
 
-    // Race all URLs in parallel -- first success wins
-    final futures = urls.map((url) => _exchangeToken(
-          serverUrl: url,
-          connectUserId: connectUserId,
-          accessKey: server.accessKey,
-          deviceId: deviceId,
-          deviceName: deviceName,
-        ));
-
-    // Collect results; return first success or throw last error
-    Object? lastError;
-    for (final future in futures) {
-      try {
-        return await future;
-      } catch (e) {
-        lastError = e;
-      }
+    if (urls.length == 1) {
+      return _exchangeToken(
+        serverUrl: urls.first,
+        connectUserId: connectUserId,
+        accessKey: server.accessKey,
+        deviceId: deviceId,
+        deviceName: deviceName,
+      );
     }
-    throw lastError is AppException
-        ? lastError
-        : const NetworkException('Could not reach server',
-            userMessage: 'Could not reach the server to exchange credentials.');
+
+    // Race all URLs -- first success wins
+    try {
+      return await Future.any(
+        urls.map((url) => _exchangeToken(
+              serverUrl: url,
+              connectUserId: connectUserId,
+              accessKey: server.accessKey,
+              deviceId: deviceId,
+              deviceName: deviceName,
+            )),
+      );
+    } catch (_) {
+      throw const NetworkException('Could not reach server',
+          userMessage: 'Could not reach the server to exchange credentials.');
+    }
   }
 
   Future<ConnectExchangeResult> _exchangeToken({

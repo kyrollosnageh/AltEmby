@@ -14,6 +14,19 @@ class TvPlayerControls extends ConsumerStatefulWidget {
 
 class _TvPlayerControlsState extends ConsumerState<TvPlayerControls> {
   bool _visible = true;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode()..requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   void _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent) return;
@@ -39,7 +52,7 @@ class _TvPlayerControlsState extends ConsumerState<TvPlayerControls> {
     final state = ref.watch(playerNotifierProvider);
 
     return KeyboardListener(
-      focusNode: FocusNode()..requestFocus(),
+      focusNode: _focusNode,
       onKeyEvent: _handleKey,
       child: AnimatedOpacity(
         opacity: _visible ? 1.0 : 0.0,

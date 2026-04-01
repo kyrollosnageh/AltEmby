@@ -87,7 +87,7 @@ class EmbyApiClient {
       if (authInterceptor.token != null) 'api_key': authInterceptor.token,
       ...?queryParameters,
     };
-    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    final query = params.entries.map((e) => '${Uri.encodeComponent(e.key.toString())}=${Uri.encodeComponent(e.value.toString())}').join('&');
     return '$_baseUrl$path?$query';
   }
 

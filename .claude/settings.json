@@ -41,7 +41,15 @@
       "Read(//c/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/**)",
       "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"entertainment media streaming video player dark immersive content-first\" --design-system -p \"AltEmby\")",
       "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"dark mode cinema streaming\" --domain color -n 5)",
-      "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"animation accessibility loading\" --domain ux -n 10)"
+      "Bash(/c/Users/kyrol/AppData/Local/Programs/Python/Python312/python \"C:/Users/kyrol/.claude/plugins/marketplaces/ui-ux-pro-max-skill/src/ui-ux-pro-max/scripts/search.py\" \"animation accessibility loading\" --domain ux -n 10)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh run:*)",
+      "Bash(gh workflow:*)",
+      "WebSearch",
+      "WebFetch(domain:dev.emby.media)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:emby.media)"
     ],
     "additionalDirectories": [
       "c:\\Users\\kyrol\\OneDrive\\Documents\\AltEmby\\docs\\superpowers"

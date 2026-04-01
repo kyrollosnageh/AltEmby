@@ -76,6 +76,7 @@ class AudioPlayerService {
   final String _baseUrl;
   final String? _token;
   DateTime _lastReport = DateTime.now();
+  final List<StreamSubscription> _subscriptions = [];
 
   final _stateController = StreamController<AudioPlayerState>.broadcast();
   Stream<AudioPlayerState> get stateStream => _stateController.stream;
@@ -87,11 +88,12 @@ class AudioPlayerService {
     required String baseUrl,
     String? token,
   }) : _reporter = reporter, _baseUrl = baseUrl, _token = token {
-    _player.stream.position.listen((p) => _update(position: p));
-    _player.stream.duration.listen((d) => _update(duration: d));
-    _player.stream.playing.listen((p) => _update(isPlaying: p));
-    _player.stream.buffering.listen((b) => _update(isBuffering: b));
-    _player.stream.completed.listen((c) { if (c) _onTrackCompleted(); });
+    _subscriptions.add(_player.stream.position.listen((p) => _update(position: p)));
+    _subscriptions.add(_player.stream.duration.listen((d) => _update(duration: d)));
+    _subscriptions.add(_player.stream.playing.listen((p) => _update(isPlaying: p)));
+    _subscriptions.add(_player.stream.buffering.listen((b) => _update(isBuffering: b)));
+    _subscriptions.add(_player.stream.completed.listen((c) { if (c) _onTrackCompleted(); }));
+    _stateController.add(_state);
   }
 
   void _update({Duration? position, Duration? duration, bool? isPlaying, bool? isBuffering}) {
@@ -212,6 +214,9 @@ class AudioPlayerService {
   }
 
   void dispose() {
+    for (final sub in _subscriptions) {
+      sub.cancel();
+    }
     final item = _state.currentItem;
     if (item != null) {
       _reporter.reportPlaybackStopped(

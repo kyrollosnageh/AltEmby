@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
@@ -81,7 +82,10 @@ class DownloadService {
 
   DownloadService({required EmbyApiClient apiClient})
       : _apiClient = apiClient,
-        _dio = Dio();
+        _dio = Dio() {
+    // Emit initial empty state
+    _stateController.add(downloads);
+  }
 
   /// Get or create an encryption key for the downloads Hive box.
   Future<List<int>> _getEncryptionKey() async {
@@ -89,12 +93,11 @@ class DownloadService {
     const keyName = 'downloads_hive_key';
     final existing = await storage.read(key: keyName);
     if (existing != null) {
-      return existing.codeUnits.take(32).toList();
+      return base64Decode(existing);
     }
-    // Generate a random 32-byte key
     final random = Random.secure();
     final key = List<int>.generate(32, (_) => random.nextInt(256));
-    await storage.write(key: keyName, value: String.fromCharCodes(key));
+    await storage.write(key: keyName, value: base64Encode(key));
     return key;
   }
 
@@ -112,7 +115,12 @@ class DownloadService {
     for (final key in box.keys) {
       final json = box.get(key);
       if (json != null) {
-        final item = DownloadItem.fromJson(Map<String, dynamic>.from(json as Map));
+        var item = DownloadItem.fromJson(Map<String, dynamic>.from(json as Map));
+        // Recover from app killed mid-download
+        if (item.status == DownloadStatus.downloading) {
+          item = item.copyWith(status: DownloadStatus.failed);
+          await box.put(item.itemId, item.toJson());
+        }
         _downloads[item.itemId] = item;
       }
     }

@@ -114,7 +114,9 @@ class _EpisodesList extends ConsumerWidget {
             maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Text(ep.runtimeFormatted, style: const TextStyle(color: Colors.grey)),
           trailing: ep.played ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null,
-          onTap: () => context.push('/details/${ep.id}'),
+          onTap: () => context.push(
+            '/player/${ep.id}?title=${Uri.encodeComponent(ep.seriesName != null ? '${ep.seriesName} - ${ep.name}' : ep.name)}&resume=${ep.playbackPositionTicks}',
+          ),
         );
       }, childCount: episodes.length)),
     );

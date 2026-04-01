@@ -96,18 +96,22 @@ final authNotifierProvider =
   return AuthNotifier(
     storageService: ref.watch(secureStorageServiceProvider),
     authRepository: ref.watch(authRepositoryProvider),
+    ref: ref,
   );
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final SecureStorageService _storageService;
   final AuthRepository _authRepository;
+  final Ref _ref;
 
   AuthNotifier({
     required SecureStorageService storageService,
     required AuthRepository authRepository,
+    required Ref ref,
   })  : _storageService = storageService,
         _authRepository = authRepository,
+        _ref = ref,
         super(const AuthState.unauthenticated());
 
   Future<void> tryRestoreSession() async {
@@ -171,6 +175,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _authRepository.logout();
     } finally {
       await _storageService.clearSession();
+      // Invalidate all user-scoped data providers
+      _ref.invalidate(savedSessionsProvider);
       state = const AuthState.unauthenticated();
     }
   }
