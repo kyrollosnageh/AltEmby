@@ -16,9 +16,10 @@ class MediaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ImageUtils.thumbnailUrl(baseUrl: baseUrl, itemId: item.id, tag: item.primaryImageTag);
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+      borderRadius: BorderRadius.circular(8),
+      splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
       child: SizedBox(
         width: width,
         child: Column(
