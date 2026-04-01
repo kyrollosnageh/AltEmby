@@ -96,18 +96,22 @@ final authNotifierProvider =
   return AuthNotifier(
     storageService: ref.watch(secureStorageServiceProvider),
     authRepository: ref.watch(authRepositoryProvider),
+    ref: ref,
   );
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final SecureStorageService _storageService;
   final AuthRepository _authRepository;
+  final Ref _ref;
 
   AuthNotifier({
     required SecureStorageService storageService,
     required AuthRepository authRepository,
+    required Ref ref,
   })  : _storageService = storageService,
         _authRepository = authRepository,
+        _ref = ref,
         super(const AuthState.unauthenticated());
 
   Future<void> tryRestoreSession() async {
@@ -142,6 +146,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
     await _storageService.saveSession(session);
     await _storageService.addSavedSession(session);
+    _ref.invalidate(savedSessionsProvider);
     state = AuthState.authenticated(session);
   }
 
@@ -152,11 +157,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState.authenticated(session);
   }
 
+  /// Authenticate via Emby Connect token exchange result.
+  /// Handles all storage, API client setup, and state in one place.
+  Future<void> loginWithConnect({
+    required UserSession session,
+    required String serverUrl,
+  }) async {
+    state = const AuthState.loading();
+    _authRepository.restoreSession(session);
+    await _storageService.saveSession(session);
+    await _storageService.addSavedSession(session);
+    await _storageService.saveServerUrl(serverUrl);
+    _ref.invalidate(savedSessionsProvider);
+    state = AuthState.authenticated(session);
+  }
+
   Future<void> logout() async {
     try {
       await _authRepository.logout();
     } finally {
       await _storageService.clearSession();
+      // Invalidate all user-scoped data providers
+      _ref.invalidate(savedSessionsProvider);
       state = const AuthState.unauthenticated();
     }
   }

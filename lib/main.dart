@@ -13,7 +13,11 @@ Future<void> main() async {
   MediaKit.ensureInitialized();
 
   // Initialize Hive for local storage
-  await Hive.initFlutter();
+  try {
+    await Hive.initFlutter();
+  } catch (_) {
+    // Hive init failed (corrupted data); will recreate on next box open
+  }
 
   runApp(const ProviderScope(child: AltEmbyApp()));
 }

@@ -7,9 +7,9 @@ final searchRepositoryProvider = Provider<SearchRepository>(
   (ref) => SearchRepository(apiClient: ref.watch(embyApiClientProvider)),
 );
 
-final searchQueryProvider = StateProvider<String>((ref) => '');
+final searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 
-final searchResultsProvider = FutureProvider<List<MediaItem>>((ref) async {
+final searchResultsProvider = FutureProvider.autoDispose<List<MediaItem>>((ref) async {
   final query = ref.watch(searchQueryProvider);
   if (query.trim().isEmpty) return [];
   final authState = ref.watch(authNotifierProvider);

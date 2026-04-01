@@ -25,8 +25,10 @@ class InvalidServerException extends AppException {
 }
 
 class AuthenticationException extends AppException {
-  const AuthenticationException(super.message)
-      : super(userMessage: 'Invalid username or password.');
+  const AuthenticationException(super.message, {String? userMessage})
+      : super(
+            userMessage:
+                userMessage ?? 'Invalid username or password.');
 }
 
 class SessionExpiredException extends AppException {

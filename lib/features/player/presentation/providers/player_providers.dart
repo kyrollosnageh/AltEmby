@@ -1,5 +1,6 @@
 // lib/features/player/presentation/providers/player_providers.dart
 
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -90,6 +91,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   final String _baseUrl;
   final String? _token;
   DateTime _lastProgressReport = DateTime.now();
+  final List<StreamSubscription> _subscriptions = [];
 
   PlayerNotifier({
     required PlaybackReporter reporter,
@@ -106,34 +108,34 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       ),
     );
 
-    player.stream.position.listen((pos) {
+    _subscriptions.add(player.stream.position.listen((pos) {
       state = state.copyWith(position: pos);
       _maybeReportProgress(pos);
-    });
-    player.stream.duration.listen((dur) {
+    }));
+    _subscriptions.add(player.stream.duration.listen((dur) {
       state = state.copyWith(duration: dur);
-    });
-    player.stream.playing.listen((p) {
+    }));
+    _subscriptions.add(player.stream.playing.listen((p) {
       state = state.copyWith(isPlaying: p);
-    });
-    player.stream.buffering.listen((b) {
+    }));
+    _subscriptions.add(player.stream.buffering.listen((b) {
       state = state.copyWith(isBuffering: b);
-    });
-    player.stream.completed.listen((c) {
+    }));
+    _subscriptions.add(player.stream.completed.listen((c) {
       if (c) state = state.copyWith(isCompleted: true);
-    });
-    player.stream.tracks.listen((tracks) {
+    }));
+    _subscriptions.add(player.stream.tracks.listen((tracks) {
       state = state.copyWith(
         audioTracks: tracks.audio,
         subtitleTracks: tracks.subtitle,
       );
-    });
-    player.stream.track.listen((track) {
+    }));
+    _subscriptions.add(player.stream.track.listen((track) {
       state = state.copyWith(
         currentAudioTrack: track.audio,
         currentSubtitleTrack: track.subtitle,
       );
-    });
+    }));
   }
 
   Future<void> openItem({
@@ -149,7 +151,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       if (_token != null) 'api_key': _token,
       if (mediaSourceId != null) 'MediaSourceId': mediaSourceId,
     };
-    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    final query = params.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
     final url = '$_baseUrl$path?$query';
 
     await player.open(Media(url), play: true);
@@ -198,6 +200,9 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
   @override
   void dispose() {
+    for (final sub in _subscriptions) {
+      sub.cancel();
+    }
     if (state.currentItemId != null) {
       _reporter.reportPlaybackStopped(
         itemId: state.currentItemId!,

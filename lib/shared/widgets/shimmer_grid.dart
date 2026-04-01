@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:altemby/core/utils/layout_utils.dart';
 
 class ShimmerGrid extends StatelessWidget {
   final int itemCount;
@@ -16,7 +17,7 @@ class ShimmerGrid extends StatelessWidget {
       child: GridView.builder(
         padding: const EdgeInsets.all(12),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: _crossAxisCount(context), childAspectRatio: childAspectRatio,
+          crossAxisCount: LayoutUtils.gridCrossAxisCount(MediaQuery.of(context).size.width), childAspectRatio: childAspectRatio,
           crossAxisSpacing: 12, mainAxisSpacing: 12),
         itemCount: itemCount,
         physics: const NeverScrollableScrollPhysics(),
@@ -26,10 +27,4 @@ class ShimmerGrid extends StatelessWidget {
     );
   }
 
-  int _crossAxisCount(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width > 900) return 6;
-    if (width > 600) return 4;
-    return 3;
-  }
 }

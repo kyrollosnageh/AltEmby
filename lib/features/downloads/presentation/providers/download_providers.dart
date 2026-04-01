@@ -5,6 +5,7 @@ import 'package:altemby/features/downloads/data/download_service.dart';
 final downloadServiceProvider = Provider<DownloadService>((ref) {
   final apiClient = ref.watch(embyApiClientProvider);
   final service = DownloadService(apiClient: apiClient);
+  service.loadFromStorage(); // Fire-and-forget init
   ref.onDispose(() => service.dispose());
   return service;
 });
