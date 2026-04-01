@@ -36,8 +36,9 @@ class TrackSelectorSheet<T> extends StatelessWidget {
         labelBuilder: (t) {
           final parts = <String>[];
           if (t.title != null && t.title!.isNotEmpty) parts.add(t.title!);
-          if (t.language != null && t.language!.isNotEmpty)
+          if (t.language != null && t.language!.isNotEmpty) {
             parts.add(t.language!);
+          }
           return parts.isEmpty ? 'Track ${t.id}' : parts.join(' - ');
         },
       ),
@@ -64,8 +65,9 @@ class TrackSelectorSheet<T> extends StatelessWidget {
           if (t == SubtitleTrack.no()) return 'Off';
           final parts = <String>[];
           if (t.title != null && t.title!.isNotEmpty) parts.add(t.title!);
-          if (t.language != null && t.language!.isNotEmpty)
+          if (t.language != null && t.language!.isNotEmpty) {
             parts.add(t.language!);
+          }
           return parts.isEmpty ? 'Track ${t.id}' : parts.join(' - ');
         },
       ),

@@ -43,6 +43,21 @@ class MovieDetailScreen extends ConsumerWidget {
       SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(16), child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(item.name, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          // Play button
+          FilledButton.icon(
+            onPressed: () {
+              final resume = item.playbackPositionTicks;
+              context.push(
+                '/player/${item.id}?title=${Uri.encodeComponent(item.name)}&resume=$resume',
+              );
+            },
+            icon: const Icon(Icons.play_arrow),
+            label: Text(item.hasProgress ? 'Resume' : 'Play'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(spacing: 12, children: [
             if (item.productionYear != null) Text('${item.productionYear}', style: const TextStyle(color: Colors.grey)),
