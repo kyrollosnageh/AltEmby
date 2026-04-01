@@ -139,15 +139,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String serverUrl,
   }) async {
     state = const AuthState.loading();
-    final session = await _authRepository.login(
-      username: username,
-      password: password,
-      serverUrl: serverUrl,
-    );
-    await _storageService.saveSession(session);
-    await _storageService.addSavedSession(session);
-    _ref.invalidate(savedSessionsProvider);
-    state = AuthState.authenticated(session);
+    try {
+      final session = await _authRepository.login(
+        username: username,
+        password: password,
+        serverUrl: serverUrl,
+      );
+      await _storageService.saveSession(session);
+      await _storageService.addSavedSession(session);
+      _ref.invalidate(savedSessionsProvider);
+      state = AuthState.authenticated(session);
+    } catch (_) {
+      state = const AuthState.unauthenticated();
+      rethrow;
+    }
   }
 
   Future<void> switchToSession(UserSession session) async {
