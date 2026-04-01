@@ -15,6 +15,8 @@ import 'package:altemby/features/home/presentation/home_screen.dart';
 import 'package:altemby/features/library/presentation/library_screen.dart';
 import 'package:altemby/features/search/presentation/search_screen.dart';
 import 'package:altemby/shared/models/media_item.dart';
+// ignore: unused_import — TV screen available for Android TV routing
+import 'package:altemby/tv/screens/tv_home_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
