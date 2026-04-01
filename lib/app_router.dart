@@ -13,6 +13,7 @@ import 'package:altemby/features/details/presentation/series_detail_screen.dart'
 import 'package:altemby/features/details/presentation/providers/details_providers.dart';
 import 'package:altemby/features/home/presentation/home_screen.dart';
 import 'package:altemby/features/library/presentation/library_screen.dart';
+import 'package:altemby/features/downloads/presentation/downloads_screen.dart';
 import 'package:altemby/features/search/presentation/search_screen.dart';
 import 'package:altemby/shared/models/media_item.dart';
 // ignore: unused_import — TV screen available for Android TV routing
@@ -61,6 +62,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/downloads', builder: (context, state) => const DownloadsScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/settings', builder: (context, state) => const Scaffold(

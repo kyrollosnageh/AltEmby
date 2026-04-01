@@ -6,6 +6,7 @@ import 'package:altemby/features/auth/presentation/providers/auth_providers.dart
 import 'package:altemby/features/details/presentation/providers/details_providers.dart';
 import 'package:altemby/features/home/presentation/widgets/home_section.dart';
 import 'package:altemby/shared/models/media_item.dart';
+import 'package:altemby/features/downloads/presentation/providers/download_providers.dart';
 import 'package:altemby/shared/widgets/emby_image.dart';
 
 class MovieDetailScreen extends ConsumerWidget {
@@ -59,6 +60,20 @@ class MovieDetailScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              ref.read(downloadServiceProvider).addDownload(item);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Download started')),
+              );
+            },
+            icon: const Icon(Icons.download),
+            label: const Text('Download'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+          const SizedBox(height: 16),
           Wrap(spacing: 12, children: [
             if (item.productionYear != null) Text('${item.productionYear}', style: const TextStyle(color: Colors.grey)),
             if (item.runtimeFormatted.isNotEmpty) Text(item.runtimeFormatted, style: const TextStyle(color: Colors.grey)),
