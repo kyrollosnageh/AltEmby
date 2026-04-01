@@ -100,60 +100,52 @@ jobs:
           mv build/app/outputs/flutter-apk/app-release.apk "AltEmby-${TAG}.apk"
           gh release upload "$TAG" "AltEmby-${TAG}.apk" --clobber
 
-  build-ios:
-    needs: ensure-release
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.RELEASE_TAG }}
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_VERSION }}
-          cache: true
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            .dart_tool
-          key: pub-macos-${{ hashFiles('pubspec.lock') }}
-          restore-keys: pub-macos-
-
-      - uses: actions/cache@v4
-        with:
-          path: ios/Pods
-          key: pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: pods-
-
-      - run: flutter pub get
-
-      - name: Install CocoaPods dependencies
-        working-directory: ios
-        run: |
-          if [ -f Podfile.lock ]; then
-            pod install
-          fi
-
-      - name: Build iOS
-        run: |
-          flutter build ios --release --no-codesign --no-pub
-        env:
-          # Parallel xcodebuild
-          FLUTTER_XCODE_PARALLEL_BUILD: "YES"
-
-      - name: Package IPA
-        run: |
-          mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r AltEmby.ipa Payload
-          rm -rf Payload
-
-      - name: Upload IPA to GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="${{ env.RELEASE_TAG }}"
-          mv AltEmby.ipa "AltEmby-${TAG}.ipa"
-          gh release upload "$TAG" "AltEmby-${TAG}.ipa" --clobber
+  # iOS build — disabled until Apple Developer account is available
+  # Uncomment to re-enable:
+  # build-ios:
+  #   needs: ensure-release
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ env.RELEASE_TAG }}
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: ${{ env.FLUTTER_VERSION }}
+  #         cache: true
+  #     - uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/.pub-cache
+  #           .dart_tool
+  #         key: pub-macos-${{ hashFiles('pubspec.lock') }}
+  #         restore-keys: pub-macos-
+  #     - uses: actions/cache@v4
+  #       with:
+  #         path: ios/Pods
+  #         key: pods-${{ hashFiles('ios/Podfile.lock') }}
+  #         restore-keys: pods-
+  #     - run: flutter pub get
+  #     - name: Install CocoaPods dependencies
+  #       working-directory: ios
+  #       run: |
+  #         if [ -f Podfile.lock ]; then
+  #           pod install
+  #         fi
+  #     - name: Build iOS
+  #       run: flutter build ios --release --no-codesign --no-pub
+  #       env:
+  #         FLUTTER_XCODE_PARALLEL_BUILD: "YES"
+  #     - name: Package IPA
+  #       run: |
+  #         mkdir -p Payload
+  #         cp -r build/ios/iphoneos/Runner.app Payload/
+  #         zip -r AltEmby.ipa Payload
+  #         rm -rf Payload
+  #     - name: Upload IPA to GitHub Release
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #         TAG="${{ env.RELEASE_TAG }}"
+  #         mv AltEmby.ipa "AltEmby-${TAG}.ipa"
+  #         gh release upload "$TAG" "AltEmby-${TAG}.ipa" --clobber
