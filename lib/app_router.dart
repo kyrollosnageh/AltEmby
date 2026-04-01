@@ -92,13 +92,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final itemId = state.pathParameters['id']!;
-          final title = state.uri.queryParameters['title'] ?? '';
-          final resumeTicks =
-              int.tryParse(state.uri.queryParameters['resume'] ?? '0') ?? 0;
+          final params = state.uri.queryParameters;
+          final title = params['title'] ?? '';
+          final resumeTicks = int.tryParse(params['resume'] ?? '0') ?? 0;
+          final mediaSourceId = params['mediaSourceId'];
+          final audioStreamIndex = int.tryParse(params['audioStreamIndex'] ?? '');
+          final subtitleStreamIndex = int.tryParse(params['subtitleStreamIndex'] ?? '');
           return VideoPlayerScreen(
             itemId: itemId,
             title: title,
             resumePositionTicks: resumeTicks,
+            mediaSourceId: mediaSourceId,
+            audioStreamIndex: audioStreamIndex,
+            subtitleStreamIndex: subtitleStreamIndex,
           );
         },
       ),

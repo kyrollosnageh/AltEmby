@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 import 'package:altemby/features/library/presentation/providers/library_providers.dart';
+import 'package:altemby/shared/models/media_item.dart';
 import 'package:altemby/shared/widgets/media_grid.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
@@ -12,37 +13,60 @@ class LibraryScreen extends ConsumerStatefulWidget {
 }
 
 class _LibraryScreenState extends ConsumerState<LibraryScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(libraryStateProvider.notifier).loadInitial();
-    });
-  }
+  bool _initialLoadDone = false;
 
   @override
   Widget build(BuildContext context) {
+    final viewsAsync = ref.watch(userViewsProvider);
+    final selectedView = ref.watch(selectedViewProvider);
     final libraryState = ref.watch(libraryStateProvider);
-    final currentType = ref.watch(libraryTypeProvider);
     final baseUrl = ref.watch(embyApiClientProvider).baseUrl;
+
+    // Auto-select first view and load when views arrive
+    ref.listen(userViewsProvider, (prev, next) {
+      next.whenData((views) {
+        if (!_initialLoadDone && views.isNotEmpty) {
+          _initialLoadDone = true;
+          final current = ref.read(selectedViewProvider);
+          if (current == null) {
+            ref.read(selectedViewProvider.notifier).state = views.first;
+            ref.read(libraryStateProvider.notifier).loadInitial();
+          }
+        }
+      });
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Library'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(children: [
-              _TypeChip(label: 'Movies', type: 'Movie', current: currentType),
-              const SizedBox(width: 8),
-              _TypeChip(label: 'Shows', type: 'Series', current: currentType),
-              const SizedBox(width: 8),
-              _TypeChip(label: 'Music', type: 'MusicAlbum', current: currentType),
-              const SizedBox(width: 8),
-              _TypeChip(label: 'Collections', type: 'BoxSet', current: currentType),
-            ]),
+          child: viewsAsync.when(
+            loading: () => const SizedBox(height: 48, child: Center(child: LinearProgressIndicator())),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text('Failed to load libraries', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ),
+            data: (views) => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: views.map((view) {
+                  final isSelected = selectedView?.id == view.id;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(view.name),
+                      selected: isSelected,
+                      onSelected: (_) {
+                        ref.read(selectedViewProvider.notifier).state = view;
+                        ref.read(libraryStateProvider.notifier).loadInitial();
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
         ),
         actions: [
@@ -73,21 +97,5 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
               hasMore: libraryState.hasMore, onLoadMore: () => ref.read(libraryStateProvider.notifier).loadMore(),
               onItemTap: (item) => context.push('/details/${item.id}')),
     );
-  }
-}
-
-class _TypeChip extends ConsumerWidget {
-  final String label;
-  final String type;
-  final String current;
-  const _TypeChip({required this.label, required this.type, required this.current});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSelected = type == current;
-    return FilterChip(label: Text(label), selected: isSelected, onSelected: (_) {
-      ref.read(libraryTypeProvider.notifier).state = type;
-      ref.read(libraryStateProvider.notifier).loadInitial();
-    });
   }
 }

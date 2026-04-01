@@ -7,7 +7,8 @@ import 'package:altemby/features/player/presentation/widgets/track_selector_shee
 
 class PlayerControls extends ConsumerStatefulWidget {
   final String title;
-  const PlayerControls({super.key, required this.title});
+  final VoidCallback? onStatsToggle;
+  const PlayerControls({super.key, required this.title, this.onStatsToggle});
 
   @override
   ConsumerState<PlayerControls> createState() => _PlayerControlsState();
@@ -191,6 +192,12 @@ class _PlayerControlsState extends ConsumerState<PlayerControls> {
                                     current: state.currentSubtitleTrack,
                                     onSelected: (t) =>
                                         notifier.setSubtitleTrack(t))),
+                        if (widget.onStatsToggle != null)
+                          IconButton(
+                              icon: const Icon(Icons.info_outline,
+                                  color: Colors.white),
+                              tooltip: 'Stats for nerds',
+                              onPressed: widget.onStatsToggle),
                       ]),
                   const SizedBox(height: 8),
                 ],

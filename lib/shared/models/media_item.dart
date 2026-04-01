@@ -1,5 +1,7 @@
 // lib/shared/models/media_item.dart
 
+import 'package:altemby/shared/models/media_source.dart';
+
 enum MediaType {
   movie, series, season, episode, audio, musicAlbum, musicArtist,
   audioBook, boxSet, playlist, folder, unknown;
@@ -43,6 +45,7 @@ class MediaItem {
   final String? seriesName;
   final String? seriesId;
   final String? parentId;
+  final List<MediaSource> mediaSources;
 
   const MediaItem({
     required this.id, required this.name, required this.type,
@@ -52,7 +55,7 @@ class MediaItem {
     this.playbackPositionTicks = 0, this.played = false,
     this.isFavorite = false, this.playCount = 0,
     this.seasonNumber, this.episodeNumber, this.seriesName,
-    this.seriesId, this.parentId,
+    this.seriesId, this.parentId, this.mediaSources = const [],
   });
 
   factory MediaItem.fromJson(Map<String, dynamic> json) {
@@ -81,6 +84,10 @@ class MediaItem {
       seriesName: json['SeriesName'] as String?,
       seriesId: json['SeriesId'] as String?,
       parentId: json['ParentId'] as String?,
+      mediaSources: (json['MediaSources'] as List<dynamic>?)
+              ?.map((e) => MediaSource.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
