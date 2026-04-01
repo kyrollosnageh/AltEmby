@@ -151,7 +151,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       if (_token != null) 'api_key': _token,
       if (mediaSourceId != null) 'MediaSourceId': mediaSourceId,
     };
-    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    final query = params.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
     final url = '$_baseUrl$path?$query';
 
     await player.open(Media(url), play: true);

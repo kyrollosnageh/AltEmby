@@ -146,6 +146,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
     await _storageService.saveSession(session);
     await _storageService.addSavedSession(session);
+    _ref.invalidate(savedSessionsProvider);
     state = AuthState.authenticated(session);
   }
 
@@ -167,6 +168,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _storageService.saveSession(session);
     await _storageService.addSavedSession(session);
     await _storageService.saveServerUrl(serverUrl);
+    _ref.invalidate(savedSessionsProvider);
     state = AuthState.authenticated(session);
   }
 

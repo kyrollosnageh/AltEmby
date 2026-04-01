@@ -188,9 +188,15 @@ class DownloadService {
     } on DioException catch (e) {
       if (e.type != DioExceptionType.cancel) {
         _updateItem(item.itemId, status: DownloadStatus.failed);
+        // Clean up partial file
+        final partialFile = File(filePath);
+        if (await partialFile.exists()) await partialFile.delete();
       }
     } catch (_) {
       _updateItem(item.itemId, status: DownloadStatus.failed);
+      // Clean up partial file
+      final partialFile = File(filePath);
+      if (await partialFile.exists()) await partialFile.delete();
     } finally {
       _cancelTokens.remove(item.itemId);
     }

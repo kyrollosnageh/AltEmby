@@ -124,7 +124,7 @@ class AudioPlayerService {
       'Static': 'true',
       if (_token != null) 'api_key': _token,
     };
-    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    final query = params.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
     return '$_baseUrl$path?$query';
   }
 

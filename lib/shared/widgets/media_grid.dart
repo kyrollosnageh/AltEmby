@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:altemby/core/utils/layout_utils.dart';
 import 'package:altemby/shared/models/media_item.dart';
 import 'package:altemby/shared/widgets/media_card.dart';
 import 'package:altemby/shared/widgets/shimmer_grid.dart';
@@ -41,13 +42,6 @@ class _MediaGridState extends State<MediaGrid> {
     }
   }
 
-  int _crossAxisCount(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width > 900) return 6;
-    if (width > 600) return 4;
-    return 3;
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.items.isEmpty && widget.isLoading) return const ShimmerGrid();
@@ -59,7 +53,7 @@ class _MediaGridState extends State<MediaGrid> {
       controller: _scrollController,
       padding: const EdgeInsets.all(12),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _crossAxisCount(context), childAspectRatio: 0.55, crossAxisSpacing: 12, mainAxisSpacing: 12),
+        crossAxisCount: LayoutUtils.gridCrossAxisCount(MediaQuery.of(context).size.width), childAspectRatio: 0.55, crossAxisSpacing: 12, mainAxisSpacing: 12),
       itemCount: widget.items.length + (widget.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= widget.items.length) return const Center(child: CircularProgressIndicator());

@@ -22,7 +22,7 @@ class LibraryState {
   bool get hasMore => items.length < totalCount;
 }
 
-final libraryStateProvider = StateNotifierProvider<LibraryNotifier, LibraryState>((ref) => LibraryNotifier(ref));
+final libraryStateProvider = StateNotifierProvider.autoDispose<LibraryNotifier, LibraryState>((ref) => LibraryNotifier(ref));
 
 class LibraryNotifier extends StateNotifier<LibraryState> {
   final Ref _ref;

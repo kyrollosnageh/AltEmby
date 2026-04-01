@@ -11,7 +11,7 @@ class ApiEndpoints {
   static const String logout = '/Sessions/Logout';
 
   // Users
-  static String publicUsers = '/Users/Public';
+  static const String publicUsers = '/Users/Public';
 
   // Library (user-scoped)
   static String userItems(String userId) => '/Users/$userId/Items';
