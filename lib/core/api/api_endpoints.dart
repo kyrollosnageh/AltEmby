@@ -14,6 +14,7 @@ class ApiEndpoints {
   static const String publicUsers = '/Users/Public';
 
   // Library (user-scoped)
+  static String userViews(String userId) => '/Users/$userId/Views';
   static String userItems(String userId) => '/Users/$userId/Items';
   static String userItem(String userId, String itemId) =>
       '/Users/$userId/Items/$itemId';

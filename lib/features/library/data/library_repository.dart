@@ -31,7 +31,7 @@ class LibraryRepository {
   }
 
   Future<List<MediaItem>> getUserViews({required String userId}) async {
-    final data = await _apiClient.get('/Users/$userId/Views');
+    final data = await _apiClient.get(ApiEndpoints.userViews(userId));
     final items = (data as Map<String, dynamic>)['Items'] as List<dynamic>;
     return items.map((e) => MediaItem.fromJson(e as Map<String, dynamic>)).toList();
   }

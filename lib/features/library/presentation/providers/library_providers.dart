@@ -2,7 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:altemby/features/auth/presentation/providers/auth_providers.dart';
 import 'package:altemby/shared/models/media_item.dart';
 
-final libraryTypeProvider = StateProvider<String>((ref) => 'Movie');
+/// Fetches the server's library views (e.g. Movies, TV Shows, Music, etc.)
+final userViewsProvider = FutureProvider<List<MediaItem>>((ref) async {
+  final authState = ref.watch(authNotifierProvider);
+  if (authState is! Authenticated) return [];
+  final repo = ref.watch(libraryRepositoryProvider);
+  return repo.getUserViews(userId: authState.session.userId);
+});
+
+/// The currently selected library view (parentId). Null means "All".
+final selectedViewProvider = StateProvider<MediaItem?>((ref) => null);
+
 final librarySortByProvider = StateProvider<String>((ref) => 'SortName');
 final librarySortOrderProvider = StateProvider<String>((ref) => 'Ascending');
 
@@ -34,11 +44,14 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     state = state.copyWith(isLoading: true, items: [], error: null);
     try {
       final repo = _ref.read(libraryRepositoryProvider);
-      final type = _ref.read(libraryTypeProvider);
+      final selectedView = _ref.read(selectedViewProvider);
       final sortBy = _ref.read(librarySortByProvider);
       final sortOrder = _ref.read(librarySortOrderProvider);
-      final result = await repo.getItems(userId: authState.session.userId, includeTypes: type,
-        startIndex: 0, limit: 50, sortBy: sortBy, sortOrder: sortOrder);
+      final result = await repo.getItems(
+        userId: authState.session.userId,
+        parentId: selectedView?.id,
+        startIndex: 0, limit: 50, sortBy: sortBy, sortOrder: sortOrder,
+      );
       state = LibraryState(items: result.items, totalCount: result.totalCount);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -52,11 +65,14 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     state = state.copyWith(isLoading: true);
     try {
       final repo = _ref.read(libraryRepositoryProvider);
-      final type = _ref.read(libraryTypeProvider);
+      final selectedView = _ref.read(selectedViewProvider);
       final sortBy = _ref.read(librarySortByProvider);
       final sortOrder = _ref.read(librarySortOrderProvider);
-      final result = await repo.getItems(userId: authState.session.userId, includeTypes: type,
-        startIndex: state.items.length, limit: 50, sortBy: sortBy, sortOrder: sortOrder);
+      final result = await repo.getItems(
+        userId: authState.session.userId,
+        parentId: selectedView?.id,
+        startIndex: state.items.length, limit: 50, sortBy: sortBy, sortOrder: sortOrder,
+      );
       state = LibraryState(items: [...state.items, ...result.items], totalCount: result.totalCount);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
